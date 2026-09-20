@@ -92,6 +92,27 @@ En **máxima calidad**, si tienes YouTube Music Premium y usas cookies, la fuent
 
 Para contenido de Premium, con restricción de edad o privado, elige tu navegador en **Cookies del navegador**. aacyoutube lee la sesión que ya tienes abierta; no le das ninguna contraseña.
 
+## Repartir la app a otra gente
+
+El código vive en este repositorio, que es **privado**. Para que cualquiera pueda instalar la app sin ver el código ni tener cuenta de GitHub, hay un segundo repositorio **público** que solo contiene el instalador y los `.dmg`:
+
+**[thl-corporation-spa/aacyoutube-descargas](https://github.com/thl-corporation-spa/aacyoutube-descargas)**
+
+Después de publicar una versión aquí, se copia allí con:
+
+```bash
+./scripts/publicar-descargas.sh          # la última versión
+./scripts/publicar-descargas.sh v2.1.0   # una concreta
+```
+
+A quien la quiera instalar le basta con esto, sin iniciar sesión en nada:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/thl-corporation-spa/aacyoutube-descargas/main/instalar.sh | bash
+```
+
+> Una rama no puede ser pública dentro de un repositorio privado: en Git la visibilidad es del repositorio entero. Por eso son dos repositorios y no dos ramas.
+
 ## Documentación
 
 | | |
