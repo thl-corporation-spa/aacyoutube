@@ -89,7 +89,6 @@ def system_prefers_dark() -> bool:
         return "dark" in out.stdout.strip().lower()
     except (OSError, subprocess.SubprocessError):
         return True
-    return True
 
 
 def _first_available(stacks: dict, families: set[str]) -> str:

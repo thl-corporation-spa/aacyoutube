@@ -39,15 +39,12 @@ def run_cli(argv):
             print("✖", problem, file=sys.stderr)
         return 1
 
-    last = {"name": None}
-
     def hook(d):
         if d["status"] == "downloading":
             total = d.get("total_bytes") or d.get("total_bytes_estimate") or 0
             pct = d.get("downloaded_bytes", 0) * 100 / total if total else 0
             name = Path(d.get("filename", "")).stem[:48]
             print(f"\r  {pct:5.1f}%  {name:<48}", end="", flush=True)
-            last["name"] = name
         elif d["status"] == "finished":
             print(f"\r  ↓ {Path(d['filename']).stem[:60]:<60}")
 
@@ -56,7 +53,10 @@ def run_cli(argv):
     code = core.download(a.urls, out_dir=out, mode="copy" if a.copy else "max",
                          cookies_browser=a.cookies, square_cover=not a.no_square,
                          playlists=a.playlists, progress_hook=hook)
-    print("✔ Listo en", out) if code == 0 else print("✖ Terminó con errores", file=sys.stderr)
+    if code == 0:
+        print("✔ Listo en", out)
+    else:
+        print("✖ Terminó con errores", file=sys.stderr)
     return code
 
 

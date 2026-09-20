@@ -208,7 +208,7 @@ def check_dependencies() -> list[str]:
     """Lista de problemas bloqueantes, ya redactados para mostrar al usuario."""
     problems = []
     if yt_dlp is None:
-        problems.append(f"Falta yt-dlp. Instálalo con: pip3 install --user --upgrade yt-dlp")
+        problems.append("Falta yt-dlp. Instálalo con: pip3 install --user --upgrade yt-dlp")
     if not find_binary("ffmpeg"):
         problems.append(f"Falta ffmpeg (convierte y etiqueta el audio). Instálalo con: {install_hint('ffmpeg')}")
     return problems

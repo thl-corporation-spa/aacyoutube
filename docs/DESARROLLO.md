@@ -116,9 +116,11 @@ La **firma ad-hoc** (`codesign -s -`) no es un lujo: en Apple Silicon un binario
    git push origin v2.1.0
    ```
 
-El flujo [`build-macos.yml`](../.github/workflows/build-macos.yml) compila en `macos-13` (Intel) y `macos-14` (Apple Silicon), comprueba que cada binario es de su arquitectura, y publica una Release con los dos `.dmg`.
+El flujo [`build-macos.yml`](../.github/workflows/build-macos.yml) compila en `macos-13` (Intel) y `macos-14` (Apple Silicon), comprueba que cada binario es de su arquitectura, y sube los dos `.dmg` a la Release de la etiqueta. El texto de la Release sale de [`notas-release.md`](../packaging/macos/notas-release.md).
 
-También se puede lanzar a mano desde la pestaña **Actions** → **Compilar app de macOS** → **Run workflow**, que deja los `.dmg` como artefactos sin crear Release.
+Cada job sube su propio `.dmg` **directamente a la Release**, sin pasar por los artefactos de Actions: los artefactos consumen la cuota de almacenamiento de la cuenta y los archivos de una Release no. El primer job que llega crea la Release y el segundo se encuentra con que ya existe.
+
+También se puede lanzar a mano desde la pestaña **Actions** → **Compilar app de macOS** → **Run workflow**. Sin etiqueta no hay Release, así que ahí sí se guardan como artefactos, y ese paso no hace fallar la compilación si la cuota está llena.
 
 ## Integración continua
 

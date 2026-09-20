@@ -10,7 +10,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
 from aacyoutube import __version__, core
-from aacyoutube.theme import IS_MAC, SPACE, Theme
+from aacyoutube.theme import IS_MAC, SPACE, Theme, round_rect
 from aacyoutube.widgets import Button, Card, Field, Meter, Segmented, Select, Switch
 
 MIN_W, MIN_H = 700, 560
@@ -208,7 +208,6 @@ class App:
         mark = tk.Canvas(head, width=44, height=44, highlightthickness=0, bd=0,
                          background=t["bg"], takefocus=0)
         mark.grid(row=0, column=0, rowspan=2, padx=(0, 14))
-        from aacyoutube.theme import round_rect
         round_rect(mark, 2, 2, 42, 42, 13, fill=t["accent"], outline=t["accent"])
         mark.create_polygon(17, 13, 17, 31, 32, 22, fill=t["on_accent"], outline="")
 

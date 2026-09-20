@@ -1,7 +1,7 @@
 name: Compilar app de macOS
 
-# Genera un .dmg por arquitectura y lo publica en una Release.
-# Al marcar una etiqueta (v2.0.0, v2.1.0…) se crea la Release automáticamente.
+# Genera un .dmg por arquitectura y lo sube a la Release de la etiqueta.
+# Al marcar una etiqueta (v2.0.0, v2.1.0…) se publica automáticamente.
 on:
   push:
     tags: ["v*"]
@@ -55,48 +55,31 @@ jobs:
           # El binario debe ser nativo de esta arquitectura, no de la otra.
           file "$APP/Contents/MacOS/aacyoutube" | grep -q "${{ matrix.arch }}"
           codesign --verify --deep --strict "$APP"
+          ls -lh dist/${{ matrix.arch }}/*.dmg
 
-      - uses: actions/upload-artifact@v4
+      # Los .dmg van directos a la Release, no a los artefactos de Actions:
+      # los artefactos consumen la cuota de almacenamiento de la cuenta y los
+      # archivos de una Release no. Cada job sube el suyo; el primero que llega
+      # crea la Release y el segundo se encuentra con que ya existe.
+      - name: Publicar el .dmg en la Release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          sed "s|@REPO@|$GITHUB_REPOSITORY|g" packaging/macos/notas-release.md > notas.md
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
+            || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
+                 --title "aacyoutube $TAG" --verify-tag --notes-file notas.md
+          gh release upload "$TAG" dist/${{ matrix.arch }}/*.dmg \
+            --repo "$GITHUB_REPOSITORY" --clobber
+
+      # En una ejecución manual no hay etiqueta a la que subir, así que el .dmg
+      # queda como artefacto. Si la cuota está llena no es motivo para fallar.
+      - name: Guardar el .dmg como artefacto
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
         with:
           name: aacyoutube-macos-${{ matrix.arch }}
           path: dist/${{ matrix.arch }}/*.dmg
-          if-no-files-found: error
-
-  release:
-    name: Publicar Release
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: dmgs
-          merge-multiple: true
-
-      - name: Crear la Release con los dos .dmg
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dmgs/*.dmg
-          generate_release_notes: true
-          body: |
-            ## Instalar en macOS
-
-            | Tu Mac | Descarga |
-            |---|---|
-            | Procesador **Intel** | `aacyoutube-*-macos-x86_64.dmg` |
-            | Chip **M1 / M2 / M3 / M4** | `aacyoutube-*-macos-arm64.dmg` |
-
-            ¿No sabes cuál? Menú  → «Acerca de este Mac».
-
-            Abre el `.dmg`, arrastra la app a Applications y **la primera vez
-            ábrela con clic derecho → Abrir** (la app no está firmada con una
-            cuenta de desarrollador de Apple).
-
-            Trae ffmpeg incluido: no hay que instalar nada más.
-
-            ## Instalar en Linux
-
-            ```bash
-            git clone git@github.com:${{ github.repository }}.git
-            cd aacyoutube && ./packaging/linux/instalar.sh
-            ```
