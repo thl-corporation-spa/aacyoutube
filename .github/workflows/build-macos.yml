@@ -68,9 +68,13 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           sed "s|@REPO@|$GITHUB_REPOSITORY|g" packaging/macos/notas-release.md > notas.md
+          # Las dos arquitecturas compilan a la vez, así que pueden intentar
+          # crear la Release al mismo tiempo: al que pierde la carrera le basta
+          # con seguir, porque la subida es la que de verdad tiene que salir bien.
           gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
             || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
-                 --title "aacyoutube $TAG" --verify-tag --notes-file notas.md
+                 --title "aacyoutube $TAG" --verify-tag --notes-file notas.md \
+            || echo "la Release ya existe, la creó el otro job"
           gh release upload "$TAG" dist/${{ matrix.arch }}/*.dmg \
             --repo "$GITHUB_REPOSITORY" --clobber
 
