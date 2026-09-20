@@ -1,0 +1,25 @@
+name: Comprobar runners de macOS
+
+# Diagnóstico: un job mínimo por etiqueta, para ver cuáles se programan de
+# verdad en esta cuenta. Un job que pide una etiqueta retirada no falla, se
+# queda encolado para siempre sin mensaje, así que esta es la forma rápida de
+# distinguir «cola lenta» de «etiqueta muerta».
+#
+#   gh workflow run comprobar-runners.yml
+on:
+  workflow_dispatch:
+
+jobs:
+  probar:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.label }}
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        label: [macos-14, macos-15, macos-15-intel]
+    steps:
+      - run: |
+          echo "etiqueta pedida : ${{ matrix.label }}"
+          echo "arquitectura    : $(uname -m)"
+          echo "sistema         : $(sw_vers -productVersion)"
