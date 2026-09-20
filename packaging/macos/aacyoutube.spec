@@ -7,7 +7,9 @@ Apple Silicon): así el binario es nativo en ambos y no hace falta Rosetta.
 Variables de entorno que acepta:
   AACY_FFMPEG_DIR  carpeta con ffmpeg/ffprobe estáticos para empotrar
   AACY_VERSION     versión que se escribe en el Info.plist
-  AACY_ARCH        'x86_64' o 'arm64' (solo para la versión mínima del sistema)
+  AACY_ARCH        'x86_64' o 'arm64': arquitectura del resultado
+  AACY_TARGET_ARCH si está, PyInstaller extrae esa mitad de los binarios
+                   universal2 (compilación cruzada desde Apple Silicon)
 """
 
 import os
@@ -52,7 +54,10 @@ exe = EXE(
     strip=False,
     upx=False,          # UPX rompe la firma de código en macOS
     console=False,
-    target_arch=None,   # cada runner compila para el suyo
+    # Sin AACY_TARGET_ARCH cada runner compila para el suyo. Con ella,
+    # PyInstaller saca esa mitad de un Python universal2, que es como se
+    # genera el binario Intel: GitHub ya no presta runners Intel.
+    target_arch=os.environ.get("AACY_TARGET_ARCH") or None,
     codesign_identity=None,
     entitlements_file=None,
 )

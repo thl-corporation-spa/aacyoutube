@@ -10,6 +10,9 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
 ARCH="${AACY_ARCH:-$(uname -m)}"
+# Para compilar Intel desde un Mac con chip Apple hace falta un Python
+# universal2; PYTHON apunta a él. Sin definir, se usa el del sistema.
+PY="${PYTHON:-python3}"
 VERSION="$(python3 -c 'import re, pathlib; print(re.search(r"__version__\s*=\s*\"([^\"]+)\"", pathlib.Path("aacyoutube/__init__.py").read_text()).group(1))')"
 DIST="dist/$ARCH"
 export AACY_ARCH="$ARCH" AACY_VERSION="$VERSION"
@@ -64,10 +67,11 @@ if [ -z "${AACY_FFMPEG_DIR:-}" ]; then
 fi
 export AACY_FFMPEG_DIR
 echo "  ffmpeg: $AACY_FFMPEG_DIR"
+echo "  python: $PY ($("$PY" -c 'import platform;print(platform.machine())'))"
 
 # ── 3. Empaquetar ─────────────────────────────────────────────────────────
 rm -rf "$DIST" build/aacyoutube
-python3 -m PyInstaller --noconfirm --clean \
+"$PY" -m PyInstaller --noconfirm --clean \
   --distpath "$DIST" --workpath "build/pyi-$ARCH" \
   packaging/macos/aacyoutube.spec
 

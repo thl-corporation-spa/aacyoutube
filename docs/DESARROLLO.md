@@ -105,45 +105,35 @@ El guion, por orden: arma el `.icns` desde los PNG del repositorio, descarga un 
 
 La **firma ad-hoc** (`codesign -s -`) no es un lujo: en Apple Silicon un binario sin firma **no arranca**. No evita el aviso de Gatekeeper, que exigiría una cuenta de desarrollador de Apple de pago.
 
-### Las etiquetas de runner de macOS
+### Runners de macOS: no hay Intel
 
-Cuidado con esto, porque falla de una forma silenciosa. GitHub **retiró `macos-13`**, que era la etiqueta del runner Intel. Un job que la pida no falla: se queda **encolado para siempre**, sin mensaje de error, así que parece que hay cola cuando en realidad no existe la máquina.
+**GitHub no asigna runners Intel a esta cuenta.** No es cola ni cuota: el job se queda encolado indefinidamente y **sin ningún mensaje de error**, que es la parte que más despista.
 
-Las etiquetas vigentes:
+Comprobado con [`comprobar-runners.yml`](../.github/workflows/comprobar-runners.yml), que lanza un `echo` por etiqueta:
 
-| Arquitectura | Etiqueta |
-|---|---|
-| Intel (x86_64) | `macos-15-intel`, `macos-26-intel` |
-| Apple Silicon (arm64) | `macos-15`, `macos-26` |
+| Etiqueta | Arquitectura | Resultado |
+|---|---|---|
+| `macos-13` | Intel | retirada por GitHub — encola para siempre |
+| `macos-14` | arm64 | arranca |
+| `macos-15` | arm64 | arranca |
+| `macos-15-intel` | Intel | **nunca arranca** |
 
-La lista viva está en el [README de actions/runner-images](https://github.com/actions/runner-images#available-images). Conviene mirarla antes de tocar la matriz; `macos-14` ya aparece como deprecado.
+Por eso **el `.dmg` de Intel se compila de forma cruzada desde un runner Apple Silicon**:
 
-### Si algún día no hay runner Intel
+1. Se instala el Python **universal2** de [python.org](https://www.python.org/downloads/macos/) — el de `setup-python` en un runner arm64 es solo arm64, y de ahí no se puede sacar una mitad Intel.
+2. La receta de PyInstaller recibe `target_arch="x86_64"` vía `AACY_TARGET_ARCH`, y extrae esa mitad de cada binario universal.
+3. El `ffmpeg` empotrado ya se descarga por arquitectura (`ffmpeg-darwin-x64`), así que encaja sin tocar nada.
+4. El paso de verificación comprueba con `lipo -archs` que dentro del `.dmg` no se haya colado un binario arm64.
 
-Si GitHub retira también los `-intel`, la versión x86_64 se puede compilar desde un runner Apple Silicon con un Python *universal2* (el de [python.org](https://www.python.org/downloads/macos/), no el de `setup-python`), añadiendo a la receta:
+Lo que **no** se puede hacer así es *ejecutar* el resultado para probarlo: eso exige un Mac Intel de verdad. Por eso la verificación se queda en comprobar la arquitectura, la firma y el `minos` del binario.
 
-```python
-exe = EXE(..., target_arch="x86_64")
+Si algún día GitHub habilita los runners Intel para la cuenta, basta con devolver la matriz a `runner: macos-15-intel` con `cruzada: false`.
+
+Si tienes un Mac Intel a mano, la vía directa sigue siendo:
+
+```bash
+./install.sh --desde-codigo
 ```
-
-PyInstaller extrae entonces la mitad x86_64 de cada binario universal. El `ffmpeg` empotrado ya se descarga por arquitectura, así que basta con forzar `AACY_ARCH=x86_64`. Lo que no se puede es *probar* el resultado en ese runner: habría que hacerlo en un Mac Intel de verdad.
-
-## Publicar una versión
-
-1. Sube la versión en `aacyoutube/__init__.py` y `pyproject.toml` (tienen que coincidir).
-2. Confirma los cambios.
-3. Marca y empuja la etiqueta:
-
-   ```bash
-   git tag v2.1.0
-   git push origin v2.1.0
-   ```
-
-El flujo [`build-macos.yml`](../.github/workflows/build-macos.yml) compila en `macos-15-intel` (Intel) y `macos-15` (Apple Silicon), comprueba que cada binario es de su arquitectura, y sube los dos `.dmg` a la Release de la etiqueta. El texto de la Release sale de [`notas-release.md`](../packaging/macos/notas-release.md).
-
-Cada job sube su propio `.dmg` **directamente a la Release**, sin pasar por los artefactos de Actions: los artefactos consumen la cuota de almacenamiento de la cuenta y los archivos de una Release no. El primer job que llega crea la Release y el segundo se encuentra con que ya existe.
-
-También se puede lanzar a mano desde la pestaña **Actions** → **Compilar app de macOS** → **Run workflow**. Sin etiqueta no hay Release, así que ahí sí se guardan como artefactos, y ese paso no hace fallar la compilación si la cuota está llena.
 
 ## Integración continua
 

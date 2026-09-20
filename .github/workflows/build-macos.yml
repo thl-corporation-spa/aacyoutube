@@ -7,14 +7,18 @@ on:
     tags: ["v*"]
   workflow_dispatch:          # también se puede lanzar a mano desde la pestaña Actions
 
+env:
+  # Versión exacta del instalador universal2 de python.org, para la cruzada.
+  PYTHON_VERSION: "3.12.8"
+
 permissions:
-  contents: write
+  contents: write             # necesario para crear la Release y subir los .dmg
 
 # Si se reetiqueta mientras algo sigue compilando, que la tanda vieja se corte
-# en vez de competir por los escasos runners de macOS con la nueva.
+# en vez de competir por los runners de macOS con la nueva.
 concurrency:
   group: macos-${{ github.ref }}
-  cancel-in-progress: true             # necesario para crear la Release y subir los .dmg
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -24,53 +28,75 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # macos-15-intel es el último runner con procesador Intel.
-          - runner: macos-15-intel
+          # Las dos compilan en un runner Apple Silicon.
+          #
+          # Los runners Intel no se asignan nunca en esta cuenta: ni macos-13,
+          # que GitHub retiró, ni macos-15-intel, que existe pero se queda en
+          # cola indefinidamente y sin error. Comprobado con el flujo
+          # comprobar-runners.yml: macos-14 y macos-15 arrancan, -intel no.
+          # Por eso el binario Intel sale por compilación cruzada.
+          - runner: macos-15
             arch: x86_64
+            cruzada: true
             label: macOS Intel (x86_64)
-          # La etiqueta sin sufijo es Apple Silicon (serie M).
           - runner: macos-15
             arch: arm64
+            cruzada: false
             label: macOS Apple Silicon (arm64)
 
     steps:
       - uses: actions/checkout@v4
 
+      # El Python de setup-python en un runner Apple Silicon es solo arm64, y de
+      # ahí no se puede extraer una mitad Intel. El instalador oficial de
+      # python.org sí es universal2, con su Tcl/Tk también universal2.
+      - name: Instalar Python universal2 (compilación cruzada)
+        if: matrix.cruzada
+        run: |
+          PKG="python-${PYTHON_VERSION}-macos11.pkg"
+          curl -fsSLO "https://www.python.org/ftp/python/${PYTHON_VERSION}/${PKG}"
+          sudo installer -pkg "$PKG" -target /
+          PYBIN="/Library/Frameworks/Python.framework/Versions/3.12/bin/python3"
+          "$PYBIN" -VV
+          # Tiene que traer las dos mitades, o la extracción del Intel fallará.
+          lipo -archs "/Library/Frameworks/Python.framework/Versions/3.12/Python"
+          echo "PYTHON=$PYBIN" >> "$GITHUB_ENV"
+
       - uses: actions/setup-python@v5
+        if: ${{ !matrix.cruzada }}
         with:
-          python-version: "3.12"   # trae el Tk 8.6 de python.org, con buen aspecto en macOS
+          python-version: "3.12"   # trae el Tk 8.6, con buen aspecto en macOS
 
       - name: Instalar dependencias de compilación
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install "pyinstaller>=6.6" yt-dlp
+          PY="${PYTHON:-python3}"
+          "$PY" -m pip install --upgrade pip
+          "$PY" -m pip install "pyinstaller>=6.6" yt-dlp
 
       - name: Comprobar que Tkinter funciona
-        run: python -c "import tkinter; print('Tk', tkinter.TkVersion)"
+        run: ${PYTHON:-python3} -c "import tkinter; print('Tk', tkinter.TkVersion)"
 
       - name: Construir .app y .dmg
         env:
           AACY_ARCH: ${{ matrix.arch }}
+          # Solo en la cruzada: le dice a PyInstaller qué mitad extraer.
+          AACY_TARGET_ARCH: ${{ matrix.cruzada && 'x86_64' || '' }}
         run: ./packaging/macos/build.sh
 
       - name: Verificar la arquitectura del resultado
         run: |
           APP="dist/${{ matrix.arch }}/aacyoutube.app"
-          file "$APP/Contents/MacOS/aacyoutube"
-          file "$APP/Contents/Frameworks/ffmpeg" || file "$APP/Contents/Resources/ffmpeg"
-          # El binario debe ser nativo de esta arquitectura, no de la otra.
-          file "$APP/Contents/MacOS/aacyoutube" | grep -q "${{ matrix.arch }}"
+          # Esto es lo que de verdad importa en la cruzada: que no se haya
+          # colado un binario arm64 dentro del .dmg que dice ser de Intel.
+          lipo -archs "$APP/Contents/MacOS/aacyoutube"
+          lipo -archs "$APP/Contents/Frameworks/ffmpeg" || true
+          lipo -archs "$APP/Contents/MacOS/aacyoutube" | grep -qw "${{ matrix.arch }}"
           codesign --verify --deep --strict "$APP"
           # Versión mínima de macOS que declara el binario de verdad, para que
           # lo que promete el Info.plist y la documentación sea cierto.
-          echo "minos real del binario:"
           otool -l "$APP/Contents/MacOS/aacyoutube" | grep -A4 LC_BUILD_VERSION | grep -E "minos|sdk" | head -2
           ls -lh dist/${{ matrix.arch }}/*.dmg
 
-      # Los .dmg van directos a la Release, no a los artefactos de Actions:
-      # los artefactos consumen la cuota de almacenamiento de la cuenta y los
-      # archivos de una Release no. Cada job sube el suyo; el primero que llega
-      # crea la Release y el segundo se encuentra con que ya existe.
       - name: Publicar el .dmg en la Release
         if: startsWith(github.ref, 'refs/tags/')
         env:
@@ -78,9 +104,9 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           sed "s|@REPO@|$GITHUB_REPOSITORY|g" packaging/macos/notas-release.md > notas.md
-          # Las dos arquitecturas compilan a la vez, así que pueden intentar
-          # crear la Release al mismo tiempo: al que pierde la carrera le basta
-          # con seguir, porque la subida es la que de verdad tiene que salir bien.
+          # Las dos arquitecturas compilan a la vez y pueden intentar crear la
+          # Release al mismo tiempo: al que pierde la carrera le basta con
+          # seguir, porque la subida es la que tiene que salir bien.
           gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
             || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
                  --title "aacyoutube $TAG" --verify-tag --notes-file notas.md \
@@ -88,8 +114,6 @@ jobs:
           gh release upload "$TAG" dist/${{ matrix.arch }}/*.dmg \
             --repo "$GITHUB_REPOSITORY" --clobber
 
-      # En una ejecución manual no hay etiqueta a la que subir, así que el .dmg
-      # queda como artefacto. Si la cuota está llena no es motivo para fallar.
       - name: Guardar el .dmg como artefacto
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         continue-on-error: true
