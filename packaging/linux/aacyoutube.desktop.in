@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=aacyoutube
+GenericName=Descargador de audio
+Comment=Descarga audio AAC de YouTube / YouTube Music, listo para iPod
+Comment[en]=Download AAC audio from YouTube / YouTube Music, ready for iPod
+Exec=@EXEC@
+Icon=aacyoutube
+Terminal=false
+Categories=AudioVideo;Audio;
+Keywords=youtube;music;aac;m4a;ipod;audio;descargar;download;
+StartupNotify=true
+StartupWMClass=aacyoutube

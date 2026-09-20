@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aacyoutube"
+version = "2.0.0"
+description = "Descarga audio AAC (.m4a) de YouTube / YouTube Music, etiquetado y listo para iPod"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{ name = "Eliezer López M." }]
+keywords = ["youtube", "youtube-music", "aac", "m4a", "ipod", "yt-dlp"]
+classifiers = [
+    "Environment :: X11 Applications",
+    "Environment :: MacOS X",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Sound/Audio",
+]
+dependencies = ["yt-dlp>=2025.11.12"]
+
+[project.optional-dependencies]
+build = ["pyinstaller>=6.6", "pillow>=10"]
+
+[project.scripts]
+aacyoutube = "aacyoutube.__main__:main"
+
+[project.gui-scripts]
+aacyoutube-gui = "aacyoutube.app:run_gui"
+
+[project.urls]
+Homepage = "https://github.com/thl-corporation-spa/aacyoutube"
+Issues = "https://github.com/thl-corporation-spa/aacyoutube/issues"
+
+[tool.setuptools]
+packages = ["aacyoutube"]
+
+[tool.setuptools.package-data]
+aacyoutube = ["assets/*"]

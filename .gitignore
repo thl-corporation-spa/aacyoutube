@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.env
+
+# Artefactos de empaquetado
+packaging/macos/*.icns
+packaging/macos/*.iconset/
+*.dmg
+*.app/
+
+# Basura de escritorio
+.DS_Store
+Thumbs.db

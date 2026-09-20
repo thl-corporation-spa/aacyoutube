@@ -1,0 +1,53 @@
+name: Pruebas
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: ${{ matrix.os }} · Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Ubuntu y macOS, Intel y Apple Silicon: las tres plataformas que soportamos.
+        os: [ubuntu-latest, macos-13, macos-14]
+        python: ["3.9", "3.12"]
+        exclude:
+          - os: macos-14      # los runners Apple Silicon no traen Python 3.9
+            python: "3.9"
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Instalar Tk y ffmpeg
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            sudo apt-get update -qq
+            sudo apt-get install -y python3-tk ffmpeg xvfb
+          else
+            brew install ffmpeg
+          fi
+
+      - name: Instalar aacyoutube
+        run: python -m pip install --upgrade pip && python -m pip install .
+
+      - name: Revisar el entorno
+        run: python -m aacyoutube --doctor
+
+      - name: La ventana debe abrir y cerrarse sin errores
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            xvfb-run -a python tests/test_gui_smoke.py
+          else
+            python tests/test_gui_smoke.py
+          fi
+
+      - name: Pruebas del núcleo
+        run: python tests/test_core.py

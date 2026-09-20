@@ -1,0 +1,16 @@
+aacyoutube — instalación en macOS
+=================================
+
+1. Arrastra "aacyoutube" a la carpeta Applications de al lado.
+
+2. La primera vez, ÁBRELA CON CLIC DERECHO → Abrir, y confirma en el aviso.
+   macOS la bloquea porque la app no está firmada con una cuenta de
+   desarrollador de pago de Apple. Solo hace falta la primera vez.
+
+   Si macOS insiste en que "está dañada", abre la Terminal y ejecuta:
+
+       xattr -dr com.apple.quarantine /Applications/aacyoutube.app
+
+3. Listo. La app trae ffmpeg dentro; no hay que instalar nada más.
+
+Documentación completa: https://github.com/thl-corporation-spa/aacyoutube
