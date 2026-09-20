@@ -105,9 +105,22 @@ El guion, por orden: arma el `.icns` desde los PNG del repositorio, descarga un 
 
 La **firma ad-hoc** (`codesign -s -`) no es un lujo: en Apple Silicon un binario sin firma **no arranca**. No evita el aviso de Gatekeeper, que exigiría una cuenta de desarrollador de Apple de pago.
 
-### Si desaparece el runner Intel
+### Las etiquetas de runner de macOS
 
-`macos-13` es el último runner de GitHub con procesador Intel y está en retirada, así que la cola puede ser larga y algún día no existirá. Cuando llegue ese día, la versión x86_64 se puede compilar desde un runner Apple Silicon con un Python *universal2* (el de [python.org](https://www.python.org/downloads/macos/), no el de `setup-python`), añadiendo a la receta:
+Cuidado con esto, porque falla de una forma silenciosa. GitHub **retiró `macos-13`**, que era la etiqueta del runner Intel. Un job que la pida no falla: se queda **encolado para siempre**, sin mensaje de error, así que parece que hay cola cuando en realidad no existe la máquina.
+
+Las etiquetas vigentes:
+
+| Arquitectura | Etiqueta |
+|---|---|
+| Intel (x86_64) | `macos-15-intel`, `macos-26-intel` |
+| Apple Silicon (arm64) | `macos-15`, `macos-26` |
+
+La lista viva está en el [README de actions/runner-images](https://github.com/actions/runner-images#available-images). Conviene mirarla antes de tocar la matriz; `macos-14` ya aparece como deprecado.
+
+### Si algún día no hay runner Intel
+
+Si GitHub retira también los `-intel`, la versión x86_64 se puede compilar desde un runner Apple Silicon con un Python *universal2* (el de [python.org](https://www.python.org/downloads/macos/), no el de `setup-python`), añadiendo a la receta:
 
 ```python
 exe = EXE(..., target_arch="x86_64")
@@ -126,7 +139,7 @@ PyInstaller extrae entonces la mitad x86_64 de cada binario universal. El `ffmpe
    git push origin v2.1.0
    ```
 
-El flujo [`build-macos.yml`](../.github/workflows/build-macos.yml) compila en `macos-13` (Intel) y `macos-14` (Apple Silicon), comprueba que cada binario es de su arquitectura, y sube los dos `.dmg` a la Release de la etiqueta. El texto de la Release sale de [`notas-release.md`](../packaging/macos/notas-release.md).
+El flujo [`build-macos.yml`](../.github/workflows/build-macos.yml) compila en `macos-15-intel` (Intel) y `macos-15` (Apple Silicon), comprueba que cada binario es de su arquitectura, y sube los dos `.dmg` a la Release de la etiqueta. El texto de la Release sale de [`notas-release.md`](../packaging/macos/notas-release.md).
 
 Cada job sube su propio `.dmg` **directamente a la Release**, sin pasar por los artefactos de Actions: los artefactos consumen la cuota de almacenamiento de la cuenta y los archivos de una Release no. El primer job que llega crea la Release y el segundo se encuentra con que ya existe.
 

@@ -18,12 +18,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # macos-13 es el último runner con procesador Intel.
-          - runner: macos-13
+          # macos-15-intel es el último runner con procesador Intel.
+          - runner: macos-15-intel
             arch: x86_64
             label: macOS Intel (x86_64)
-          # macos-14 en adelante son Apple Silicon (serie M).
-          - runner: macos-14
+          # La etiqueta sin sufijo es Apple Silicon (serie M).
+          - runner: macos-15
             arch: arm64
             label: macOS Apple Silicon (arm64)
 
@@ -55,6 +55,10 @@ jobs:
           # El binario debe ser nativo de esta arquitectura, no de la otra.
           file "$APP/Contents/MacOS/aacyoutube" | grep -q "${{ matrix.arch }}"
           codesign --verify --deep --strict "$APP"
+          # Versión mínima de macOS que declara el binario de verdad, para que
+          # lo que promete el Info.plist y la documentación sea cierto.
+          echo "minos real del binario:"
+          otool -l "$APP/Contents/MacOS/aacyoutube" | grep -A4 LC_BUILD_VERSION | grep -E "minos|sdk" | head -2
           ls -lh dist/${{ matrix.arch }}/*.dmg
 
       # Los .dmg van directos a la Release, no a los artefactos de Actions:
