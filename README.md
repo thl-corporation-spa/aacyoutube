@@ -31,27 +31,14 @@ Pegas enlaces, pulsas **Descargar** y obtienes archivos que un iPod reproduce si
 Pega esto en la app **Terminal**:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/thl-corporation-spa/aacyoutube/main/scripts/instalar-macos.sh | bash
+curl -fsSL https://raw.githubusercontent.com/thl-corporation-spa/aacyoutube/main/scripts/instalar-mac.sh | bash
 ```
 
-Detecta si tu Mac es Intel o Apple Silicon, descarga la versión que toca, la instala en `Aplicaciones` y le quita la marca de cuarentena, así que no verás ningún aviso.
+Y ya está. Instala lo que falte (Homebrew, ffmpeg, Python), monta la app en `Aplicaciones` y deja el mandato `aacyoutube` en la terminal. Funciona igual en Intel que en chip Apple.
 
-**O a mano**, desde la [última versión publicada](../../releases/latest):
+Como la app **se construye en tu propio Mac** en vez de descargarse ya hecha, macOS no la marca en cuarentena: no verás el aviso de «está dañada» ni tendrás que abrirla con clic derecho.
 
-| Tu Mac | Archivo |
-|---|---|
-| Procesador **Intel** | `aacyoutube-*-macos-x86_64.dmg` |
-| Chip **M1 · M2 · M3 · M4** | `aacyoutube-*-macos-arm64.dmg` |
-
-¿No sabes cuál tienes? Menú  → **Acerca de este Mac**.
-
-Ábrelo, arrastra la app a `Aplicaciones` y **la primera vez ábrela con clic derecho → Abrir**. Si macOS dice que «está dañada»:
-
-```bash
-xattr -dr com.apple.quarantine /Applications/aacyoutube.app
-```
-
-La app trae ffmpeg dentro: no hay que instalar nada más.
+La primera vez tarda unos minutos, casi todo instalando ffmpeg.
 
 ### Linux (Fedora, Ubuntu, Debian, Arch, openSUSE)
 

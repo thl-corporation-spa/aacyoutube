@@ -10,41 +10,46 @@
 
 ## macOS
 
-### Qué Mac tengo
+### Una línea y listo
 
-Menú  → **Acerca de este Mac**. La línea «Chip» o «Procesador» te lo dice:
-
-| Dice | Es | Descarga |
-|---|---|---|
-| Chip Apple M1, M2, M3, M4… | Apple Silicon | `…-macos-arm64.dmg` |
-| Procesador Intel Core i5/i7/i9… | Intel | `…-macos-x86_64.dmg` |
-
-Cada `.dmg` trae un binario **nativo** de su arquitectura, así que en un Mac con chip M no hace falta Rosetta.
-
-Versiones mínimas: **macOS 10.15 Catalina** en Intel, **macOS 11 Big Sur** en Apple Silicon.
-
-### Opción A — una línea en la Terminal
+Abre la app **Terminal** y pega:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/thl-corporation-spa/aacyoutube/main/scripts/instalar-macos.sh | bash
+curl -fsSL https://raw.githubusercontent.com/thl-corporation-spa/aacyoutube/main/scripts/instalar-mac.sh | bash
 ```
 
-Detecta la arquitectura, descarga el `.dmg` correcto, lo instala en `/Applications` y le quita la marca de cuarentena.
+Hace todo por ti:
 
-### Opción B — desde el navegador
+1. Comprueba las **Herramientas de línea de comandos de Xcode** y las pide si faltan.
+2. Instala **Homebrew** si no lo tienes (preguntando antes).
+3. Instala **ffmpeg**, **Python 3.12**, **python-tk** y **Node** con `brew`.
+4. Crea un entorno propio en `~/Library/Application Support/aacyoutube`.
+5. Descarga aacyoutube desde GitHub y lo instala ahí.
+6. Monta **aacyoutube.app** en `Aplicaciones`, con su icono.
+7. Deja el mandato `aacyoutube` en `~/.local/bin`.
 
-1. Abre la página de [versiones publicadas](../../releases/latest).
-2. Descarga el `.dmg` que corresponde a tu Mac.
-3. Ábrelo y arrastra **aacyoutube** a la carpeta `Applications`.
-4. **La primera vez, ábrela con clic derecho → Abrir** y confirma en el aviso.
+Funciona igual en Intel que en Apple Silicon: no descarga ningún binario ya compilado, así que no depende de la arquitectura.
 
-### Opción C — desde el código
+**Y no hay aviso de Gatekeeper.** La app se construye en tu Mac en lugar de bajarse hecha, así que macOS no la pone en cuarentena.
+
+La primera vez tarda unos minutos, sobre todo compilando o bajando ffmpeg.
+
+### Qué deja instalado, y cómo quitarlo
+
+| | |
+|---|---|
+| La app | `/Applications/aacyoutube.app` — un envoltorio, no un binario |
+| El programa | `~/Library/Application Support/aacyoutube/venv` |
+| El mandato | `~/.local/bin/aacyoutube` |
+| Los ajustes | `~/Library/Application Support/aacyoutube/config.json` |
+
+Para desinstalar:
 
 ```bash
-git clone https://github.com/thl-corporation-spa/aacyoutube.git
-cd aacyoutube
-./install.sh
+rm -rf /Applications/aacyoutube.app ~/Library/Application\ Support/aacyoutube ~/.local/bin/aacyoutube
 ```
+
+Tu música descargada no se toca. `ffmpeg` y compañía se quedan; quítalos con `brew uninstall` si no los quieres.
 
 ### El aviso de macOS
 
