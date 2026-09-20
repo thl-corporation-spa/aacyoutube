@@ -105,6 +105,16 @@ El guion, por orden: arma el `.icns` desde los PNG del repositorio, descarga un 
 
 La **firma ad-hoc** (`codesign -s -`) no es un lujo: en Apple Silicon un binario sin firma **no arranca**. No evita el aviso de Gatekeeper, que exigiría una cuenta de desarrollador de Apple de pago.
 
+### Si desaparece el runner Intel
+
+`macos-13` es el último runner de GitHub con procesador Intel y está en retirada, así que la cola puede ser larga y algún día no existirá. Cuando llegue ese día, la versión x86_64 se puede compilar desde un runner Apple Silicon con un Python *universal2* (el de [python.org](https://www.python.org/downloads/macos/), no el de `setup-python`), añadiendo a la receta:
+
+```python
+exe = EXE(..., target_arch="x86_64")
+```
+
+PyInstaller extrae entonces la mitad x86_64 de cada binario universal. El `ffmpeg` empotrado ya se descarga por arquitectura, así que basta con forzar `AACY_ARCH=x86_64`. Lo que no se puede es *probar* el resultado en ese runner: habría que hacerlo en un Mac Intel de verdad.
+
 ## Publicar una versión
 
 1. Sube la versión en `aacyoutube/__init__.py` y `pyproject.toml` (tienen que coincidir).
