@@ -8,7 +8,13 @@ on:
   workflow_dispatch:          # también se puede lanzar a mano desde la pestaña Actions
 
 permissions:
-  contents: write             # necesario para crear la Release y subir los .dmg
+  contents: write
+
+# Si se reetiqueta mientras algo sigue compilando, que la tanda vieja se corte
+# en vez de competir por los escasos runners de macOS con la nueva.
+concurrency:
+  group: macos-${{ github.ref }}
+  cancel-in-progress: true             # necesario para crear la Release y subir los .dmg
 
 jobs:
   build:
