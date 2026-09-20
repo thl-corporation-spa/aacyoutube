@@ -10,9 +10,14 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
 ARCH="${AACY_ARCH:-$(uname -m)}"
-VERSION="$(python3 -c 'import re,pathlib; print(re.search(r"\"(.+?)\"", pathlib.Path("aacyoutube/__init__.py").read_text()).group(1))')"
+VERSION="$(python3 -c 'import re, pathlib; print(re.search(r"__version__\s*=\s*\"([^\"]+)\"", pathlib.Path("aacyoutube/__init__.py").read_text()).group(1))')"
 DIST="dist/$ARCH"
 export AACY_ARCH="$ARCH" AACY_VERSION="$VERSION"
+
+case "$VERSION" in
+  [0-9]*.[0-9]*) ;;
+  *) echo "versión ilegible en aacyoutube/__init__.py: '$VERSION'" >&2; exit 1 ;;
+esac
 
 echo "▸ aacyoutube $VERSION para $ARCH"
 

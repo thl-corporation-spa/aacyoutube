@@ -122,9 +122,9 @@ También se puede lanzar a mano desde la pestaña **Actions** → **Compilar app
 
 ## Integración continua
 
-[`ci.yml`](../.github/workflows/ci.yml) corre en cada `push` y cada pull request sobre Ubuntu, macOS Intel y macOS Apple Silicon, con Python 3.9 y 3.12: instala, ejecuta `--doctor`, abre la ventana bajo Xvfb y pasa las pruebas del núcleo.
+[`ci.yml`](../.github/workflows/ci.yml) corre en cada `push` y cada pull request sobre Ubuntu, macOS Intel y macOS Apple Silicon, con Python 3.10 y 3.12: instala, ejecuta `--doctor`, abre la ventana bajo Xvfb y pasa las pruebas del núcleo.
 
-Python 3.9 marca el mínimo, que es lo que trae macOS Catalina.
+Python 3.10 marca el mínimo, porque es lo que pide yt-dlp desde noviembre de 2025.
 
 ## Dependencias
 

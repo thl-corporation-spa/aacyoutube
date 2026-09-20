@@ -128,7 +128,7 @@ AACY_PREFIX=/opt/aacyoutube ./packaging/linux/instalar.sh
 
 ## Desde el código
 
-Sin instalador, en cualquier sistema con Python 3.9 o superior:
+Sin instalador, en cualquier sistema con Python 3.10 o superior:
 
 ```bash
 git clone git@github.com:thl-corporation-spa/aacyoutube.git

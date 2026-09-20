@@ -15,10 +15,8 @@ jobs:
       matrix:
         # Ubuntu y macOS, Intel y Apple Silicon: las tres plataformas que soportamos.
         os: [ubuntu-latest, macos-13, macos-14]
-        python: ["3.9", "3.12"]
-        exclude:
-          - os: macos-14      # los runners Apple Silicon no traen Python 3.9
-            python: "3.9"
+        # 3.10 es el mínimo real: yt-dlp dejó de publicar para 3.9.
+        python: ["3.10", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
