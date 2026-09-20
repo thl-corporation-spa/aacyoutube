@@ -3,7 +3,7 @@
 ## Montar el entorno
 
 ```bash
-git clone git@github.com:thl-corporation-spa/aacyoutube.git
+git clone https://github.com/thl-corporation-spa/aacyoutube.git
 cd aacyoutube
 
 # --system-site-packages para que el entorno vea el tkinter del sistema
@@ -144,28 +144,6 @@ El flujo [`build-macos.yml`](../.github/workflows/build-macos.yml) compila en `m
 Cada job sube su propio `.dmg` **directamente a la Release**, sin pasar por los artefactos de Actions: los artefactos consumen la cuota de almacenamiento de la cuenta y los archivos de una Release no. El primer job que llega crea la Release y el segundo se encuentra con que ya existe.
 
 También se puede lanzar a mano desde la pestaña **Actions** → **Compilar app de macOS** → **Run workflow**. Sin etiqueta no hay Release, así que ahí sí se guardan como artefactos, y ese paso no hace fallar la compilación si la cuota está llena.
-
-## Repartir la versión al público
-
-Este repositorio es privado. El público es
-**[aacyoutube-descargas](https://github.com/thl-corporation-spa/aacyoutube-descargas)**, y solo contiene `instalar.sh`, el README, las capturas y los `.dmg` de cada Release. Nada de código.
-
-Una rama no sirve para esto: en Git la visibilidad es del repositorio entero, así que quien pueda ver una rama puede ver todas y el historial completo.
-
-Cuando la compilación de macOS haya terminado y la Release privada tenga los dos `.dmg`:
-
-```bash
-./scripts/publicar-descargas.sh
-```
-
-Descarga los `.dmg` de la Release privada, crea (o actualiza) la misma etiqueta en el repositorio público y los sube allí. Si falta alguna arquitectura, avisa antes de seguir. Las notas de la Release pública salen de [`notas-publicas.md`](../packaging/macos/notas-publicas.md), que a diferencia de las privadas no menciona el repositorio privado, porque nadie de fuera puede abrirlo.
-
-El guion se ejecuta desde tu máquina con `gh`; no hay ningún token guardado en Actions. Si algún día quieres que sea automático, haría falta un PAT con permiso de escritura sobre el repositorio público, guardado como secreto en este.
-
-### Qué no debe acabar en el repositorio público
-
-- Código fuente, recetas de compilación o flujos de trabajo.
-- Tu nombre y correo personales: los commits de allí van firmados como `THL Corporation <246282385+thl-corporation-spa@users.noreply.github.com>`, y el `LICENSE` dice «THL Corporation». Los de aquí sí usan tu identidad habitual.
 
 ## Integración continua
 

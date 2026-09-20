@@ -28,7 +28,15 @@ Pegas enlaces, pulsas **Descargar** y obtienes archivos que un iPod reproduce si
 
 ### macOS (Intel y serie M)
 
-Descarga el `.dmg` de la [última versión publicada](../../releases/latest), **eligiendo el que corresponde a tu Mac**:
+Pega esto en la app **Terminal**:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/thl-corporation-spa/aacyoutube/main/scripts/instalar-macos.sh | bash
+```
+
+Detecta si tu Mac es Intel o Apple Silicon, descarga la versión que toca, la instala en `Aplicaciones` y le quita la marca de cuarentena, así que no verás ningún aviso.
+
+**O a mano**, desde la [última versión publicada](../../releases/latest):
 
 | Tu Mac | Archivo |
 |---|---|
@@ -37,24 +45,18 @@ Descarga el `.dmg` de la [última versión publicada](../../releases/latest), **
 
 ¿No sabes cuál tienes? Menú  → **Acerca de este Mac**.
 
-Ábrelo, arrastra la app a `Applications` y **la primera vez ábrela con clic derecho → Abrir**.
-La app trae ffmpeg dentro: no hay que instalar nada más.
-
-Si prefieres no usar el navegador, con la [CLI de GitHub](https://cli.github.com) instalada:
+Ábrelo, arrastra la app a `Aplicaciones` y **la primera vez ábrela con clic derecho → Abrir**. Si macOS dice que «está dañada»:
 
 ```bash
-gh repo clone thl-corporation-spa/aacyoutube
-cd aacyoutube && ./install.sh
+xattr -dr com.apple.quarantine /Applications/aacyoutube.app
 ```
 
-Detecta solo si tu Mac es Intel o Apple Silicon, descarga el `.dmg` correcto y lo instala.
-
-> El repositorio es privado, así que las descargas directas necesitan que hayas iniciado sesión en GitHub (en el navegador o con `gh auth login`).
+La app trae ffmpeg dentro: no hay que instalar nada más.
 
 ### Linux (Fedora, Ubuntu, Debian, Arch, openSUSE)
 
 ```bash
-git clone git@github.com:thl-corporation-spa/aacyoutube.git
+git clone https://github.com/thl-corporation-spa/aacyoutube.git
 cd aacyoutube && ./install.sh
 ```
 
@@ -91,27 +93,6 @@ En **máxima calidad**, si tienes YouTube Music Premium y usas cookies, la fuent
 ### Cookies del navegador
 
 Para contenido de Premium, con restricción de edad o privado, elige tu navegador en **Cookies del navegador**. aacyoutube lee la sesión que ya tienes abierta; no le das ninguna contraseña.
-
-## Repartir la app a otra gente
-
-El código vive en este repositorio, que es **privado**. Para que cualquiera pueda instalar la app sin ver el código ni tener cuenta de GitHub, hay un segundo repositorio **público** que solo contiene el instalador y los `.dmg`:
-
-**[thl-corporation-spa/aacyoutube-descargas](https://github.com/thl-corporation-spa/aacyoutube-descargas)**
-
-Después de publicar una versión aquí, se copia allí con:
-
-```bash
-./scripts/publicar-descargas.sh          # la última versión
-./scripts/publicar-descargas.sh v2.1.0   # una concreta
-```
-
-A quien la quiera instalar le basta con esto, sin iniciar sesión en nada:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/thl-corporation-spa/aacyoutube-descargas/main/instalar.sh | bash
-```
-
-> Una rama no puede ser pública dentro de un repositorio privado: en Git la visibilidad es del repositorio entero. Por eso son dos repositorios y no dos ramas.
 
 ## Documentación
 

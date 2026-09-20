@@ -23,27 +23,28 @@ Cada `.dmg` trae un binario **nativo** de su arquitectura, así que en un Mac co
 
 Versiones mínimas: **macOS 10.15 Catalina** en Intel, **macOS 11 Big Sur** en Apple Silicon.
 
-### Opción A — desde el navegador
+### Opción A — una línea en la Terminal
 
-1. Abre la página de [versiones publicadas](../../releases/latest) con tu sesión de GitHub iniciada (el repositorio es privado).
+```bash
+curl -fsSL https://raw.githubusercontent.com/thl-corporation-spa/aacyoutube/main/scripts/instalar-macos.sh | bash
+```
+
+Detecta la arquitectura, descarga el `.dmg` correcto, lo instala en `/Applications` y le quita la marca de cuarentena.
+
+### Opción B — desde el navegador
+
+1. Abre la página de [versiones publicadas](../../releases/latest).
 2. Descarga el `.dmg` que corresponde a tu Mac.
 3. Ábrelo y arrastra **aacyoutube** a la carpeta `Applications`.
 4. **La primera vez, ábrela con clic derecho → Abrir** y confirma en el aviso.
 
-### Opción B — desde la terminal
-
-Necesitas la [CLI de GitHub](https://cli.github.com), que sabe autenticarse en un repositorio privado:
+### Opción C — desde el código
 
 ```bash
-brew install gh          # si no la tienes
-gh auth login            # una sola vez
-
-gh repo clone thl-corporation-spa/aacyoutube
+git clone https://github.com/thl-corporation-spa/aacyoutube.git
 cd aacyoutube
 ./install.sh
 ```
-
-Detecta la arquitectura, descarga el `.dmg` correcto, lo instala en `/Applications` y le quita la marca de cuarentena, así que no verás ningún aviso.
 
 ### El aviso de macOS
 
@@ -76,7 +77,7 @@ brew install ffmpeg
 Probado en Fedora y Ubuntu; el instalador también reconoce Debian, Arch y openSUSE.
 
 ```bash
-git clone git@github.com:thl-corporation-spa/aacyoutube.git
+git clone https://github.com/thl-corporation-spa/aacyoutube.git
 cd aacyoutube
 ./install.sh
 ```
@@ -131,7 +132,7 @@ AACY_PREFIX=/opt/aacyoutube ./packaging/linux/instalar.sh
 Sin instalador, en cualquier sistema con Python 3.10 o superior:
 
 ```bash
-git clone git@github.com:thl-corporation-spa/aacyoutube.git
+git clone https://github.com/thl-corporation-spa/aacyoutube.git
 cd aacyoutube
 python3 -m venv --system-site-packages .venv
 source .venv/bin/activate
@@ -159,7 +160,7 @@ Genera `dist/<arquitectura>/aacyoutube.app` y su `.dmg`, compilados para el Mac 
 
 ## Actualizar
 
-**macOS** — vuelve a ejecutar `./scripts/instalar-macos.sh`, o descarga el `.dmg` nuevo y reemplaza la app.
+**macOS** — vuelve a ejecutar la misma línea de instalación: reemplaza la versión anterior.
 
 **Linux** — desde la carpeta del repositorio:
 
